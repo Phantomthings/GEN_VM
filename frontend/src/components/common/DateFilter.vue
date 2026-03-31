@@ -10,12 +10,12 @@ const model = defineModel<Date | null>()
 
 const minDate = computed(() => {
   if (!props.availableDates?.length) return undefined
-  return new Date(props.availableDates[0])
+  return new Date(`${props.availableDates[0]}T12:00:00`)
 })
 
 const maxDate = computed(() => {
   if (!props.availableDates?.length) return undefined
-  return new Date(props.availableDates[props.availableDates.length - 1])
+  return new Date(`${props.availableDates[props.availableDates.length - 1]}T12:00:00`)
 })
 </script>
 

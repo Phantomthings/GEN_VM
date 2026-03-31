@@ -1,6 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+function parseYmdToLocalNoon(ymd: string): Date {
+  return new Date(`${ymd}T12:00:00`)
+}
+
+function formatDateToYmdLocal(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export const useFiltersStore = defineStore('filters', () => {
   const dailyProject = ref<string | null>(null)
   const dailyDate = ref<string | null>(null)
@@ -23,7 +34,7 @@ export const useFiltersStore = defineStore('filters', () => {
     const target = dailyDate.value && availableDates.includes(dailyDate.value)
       ? dailyDate.value
       : availableDates[availableDates.length - 1]
-    return new Date(target + 'T12:00:00')
+    return parseYmdToLocalNoon(target)
   }
 
   function setMultiSites(s: string[]) {
@@ -39,5 +50,6 @@ export const useFiltersStore = defineStore('filters', () => {
     dailyProject, dailyDate,
     multiSites, multiDateStart, multiDateEnd,
     setDailyProject, setDailyDate, resolveDailyDate, setMultiSites, setMultiDateRange,
+    parseYmdToLocalNoon, formatDateToYmdLocal,
   }
 })
