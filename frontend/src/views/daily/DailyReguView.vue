@@ -22,23 +22,40 @@ const selectedDate = ref<Date | null>(null)
 const availableDates = ref<string[]>([])
 const loading = ref(false)
 const data = ref<Record<string, unknown> | null>(null)
+let requestId = 0
+
+watch(() => filters.dailyProject, (p) => {
+  if (p && p !== project.value) project.value = p
+})
+
+watch(() => filters.dailyDate, (d) => {
+  if (!d) return
+  const next = new Date(`${d}T12:00:00`)
+  if (!selectedDate.value || selectedDate.value.toISOString().slice(0, 10) !== d) selectedDate.value = next
+})
 
 watch(project, async (p) => {
   if (!p) return
   filters.setDailyProject(p)
-  availableDates.value = await fetchReguDates(p)
-  selectedDate.value = filters.resolveDailyDate(availableDates.value)
+  const currentRequest = ++requestId
+  const dates = await fetchReguDates(p)
+  if (currentRequest !== requestId) return
+  availableDates.value = dates
+  selectedDate.value = filters.resolveDailyDate(dates)
 }, { immediate: true })
 
 watch(selectedDate, async (d) => {
   if (!d || !project.value) return
   const dateStr = d.toISOString().split('T')[0]
   filters.setDailyDate(dateStr)
+  const currentRequest = ++requestId
   loading.value = true
   try {
-    data.value = await fetchReguData(project.value, dateStr)
+    const payload = await fetchReguData(project.value, dateStr)
+    if (currentRequest !== requestId) return
+    data.value = payload
   } finally {
-    loading.value = false
+    if (currentRequest === requestId) loading.value = false
   }
 })
 

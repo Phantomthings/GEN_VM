@@ -15,27 +15,44 @@ const selectedDate = ref<Date | null>(null)
 const availableDates = ref<string[]>([])
 const loading = ref(false)
 const data = ref<Record<string, unknown> | null>(null)
+let requestId = 0
 
 // Which plugs to display
 const allPlugs = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 const selectedPlugs = ref<string[]>([...allPlugs])
 
+watch(() => filters.dailyProject, (p) => {
+  if (p && p !== project.value) project.value = p
+})
+
+watch(() => filters.dailyDate, (d) => {
+  if (!d) return
+  const next = new Date(`${d}T12:00:00`)
+  if (!selectedDate.value || selectedDate.value.toISOString().slice(0, 10) !== d) selectedDate.value = next
+})
+
 watch(project, async (p) => {
   if (!p) return
   filters.setDailyProject(p)
-  availableDates.value = await fetchPowerLimitationDates(p)
-  selectedDate.value = filters.resolveDailyDate(availableDates.value)
+  const currentRequest = ++requestId
+  const dates = await fetchPowerLimitationDates(p)
+  if (currentRequest !== requestId) return
+  availableDates.value = dates
+  selectedDate.value = filters.resolveDailyDate(dates)
 }, { immediate: true })
 
 watch(selectedDate, async (d) => {
   if (!d || !project.value) return
   const dateStr = d.toISOString().split('T')[0]
   filters.setDailyDate(dateStr)
+  const currentRequest = ++requestId
   loading.value = true
   try {
-    data.value = await fetchPowerLimitationData(project.value, dateStr)
+    const payload = await fetchPowerLimitationData(project.value, dateStr)
+    if (currentRequest !== requestId) return
+    data.value = payload
   } finally {
-    loading.value = false
+    if (currentRequest === requestId) loading.value = false
   }
 })
 

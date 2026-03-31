@@ -16,23 +16,40 @@ const selectedDate = ref<Date | null>(null)
 const availableDates = ref<string[]>([])
 const loading = ref(false)
 const data = ref<Record<string, unknown> | null>(null)
+let requestId = 0
+
+watch(() => filters.dailyProject, (p) => {
+  if (p && p !== project.value) project.value = p
+})
+
+watch(() => filters.dailyDate, (d) => {
+  if (!d) return
+  const next = new Date(`${d}T12:00:00`)
+  if (!selectedDate.value || selectedDate.value.toISOString().slice(0, 10) !== d) selectedDate.value = next
+})
 
 watch(project, async (p) => {
   if (!p) return
   filters.setDailyProject(p)
-  availableDates.value = await fetchEnergyDates(p)
-  selectedDate.value = filters.resolveDailyDate(availableDates.value)
+  const currentRequest = ++requestId
+  const dates = await fetchEnergyDates(p)
+  if (currentRequest !== requestId) return
+  availableDates.value = dates
+  selectedDate.value = filters.resolveDailyDate(dates)
 }, { immediate: true })
 
 watch(selectedDate, async (d) => {
   if (!d || !project.value) return
   const dateStr = d.toISOString().split('T')[0]
   filters.setDailyDate(dateStr)
+  const currentRequest = ++requestId
   loading.value = true
   try {
-    data.value = await fetchEnergyData(project.value, dateStr)
+    const payload = await fetchEnergyData(project.value, dateStr)
+    if (currentRequest !== requestId) return
+    data.value = payload
   } finally {
-    loading.value = false
+    if (currentRequest === requestId) loading.value = false
   }
 })
 
@@ -43,7 +60,6 @@ function buildPowerChart(yField: 'res_kw' | 'ev_kw', title: string): EChartsOpti
   const pts = (data.value?.minute_chart as Array<Record<string, unknown>>) ?? []
   if (!pts.length) return {}
 
-  // Split into segments by mode
   const segments: Array<{ mode: number; times: string[]; values: number[] }> = []
   let current: typeof segments[0] | null = null
 
@@ -51,10 +67,7 @@ function buildPowerChart(yField: 'res_kw' | 'ev_kw', title: string): EChartsOpti
     const m = (p.mode as number) ?? 0
     const v = Math.abs((p[yField] as number) ?? 0)
     if (!current || current.mode !== m) {
-      // Bridge: duplicate last point of previous segment
-      if (current) {
-        segments.push(current)
-      }
+      if (current) segments.push(current)
       current = { mode: m, times: [p.time as string], values: [v] }
     } else {
       current.times.push(p.time as string)
@@ -63,7 +76,6 @@ function buildPowerChart(yField: 'res_kw' | 'ev_kw', title: string): EChartsOpti
   }
   if (current) segments.push(current)
 
-  // Name each segment by its mode label — ECharts groups same-name series in legend
   const series = segments.map((seg) => ({
     type: 'line' as const,
     data: seg.times.map((t, j) => [t, seg.values[j]]),
@@ -78,10 +90,7 @@ function buildPowerChart(yField: 'res_kw' | 'ev_kw', title: string): EChartsOpti
   return {
     title: { text: title, left: 'center', top: 4, textStyle: { fontSize: 14 } },
     tooltip: { trigger: 'axis' },
-    xAxis: {
-      type: 'time',
-      axisLabel: { formatter: '{HH}:{mm}' },
-    },
+    xAxis: { type: 'time', axisLabel: { formatter: '{HH}:{mm}' } },
     yAxis: { type: 'value', name: 'kW' },
     series,
     legend: {
@@ -115,13 +124,11 @@ const kpi = computed(() => (data.value?.kpi as Record<string, number>) ?? {})
   <LoadingOverlay v-if="loading" />
 
   <template v-else-if="data">
-    <!-- Power charts -->
     <div class="section" v-if="(data.minute_chart as unknown[])?.length">
       <LineChart :option="resChartOption" height="350px" />
       <LineChart :option="evChartOption" height="350px" style="margin-top: 1rem" />
     </div>
 
-    <!-- KPI cards -->
     <div class="kpi-grid">
       <KpiCard title="Puissance batterie max" :value="`${kpi.max_pdc_kw ?? 0} kW`" color="blue" />
       <KpiCard title="Puissance EV max" :value="`${kpi.max_ev_kw ?? 0} kW`" color="green" />
