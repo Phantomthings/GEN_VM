@@ -44,7 +44,7 @@ watch(dateRange, async (range) => {
   }
 })
 
-// â”€â”€ Chart helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Chart helpers ────────────────────────────────────────────────────────────
 const palette = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7']
 function siteColor(site: string, allSites: string[]): string {
   return palette[allSites.indexOf(site) % palette.length]
@@ -85,13 +85,13 @@ function buildBoxChart(): EChartsOption {
   const boxes = (data.value?.boxplot_minutes_run as Array<{ site: string; min: number; q1: number; median: number; q3: number; max: number }>) ?? []
   if (!boxes.length) return {}
   return {
-    title: { text: 'Distribution de la durÃ©e passÃ©e en RUN (2)', left: 'center', textStyle: { fontSize: 13 } },
+    title: { text: 'Distribution de la durée passée en RUN (2)', left: 'center', textStyle: { fontSize: 13 } },
     tooltip: {
       trigger: 'item',
       formatter: (params) => {
         const point = Array.isArray(params) ? params[0] : params
         const values = Array.isArray(point?.data) ? point.data : []
-        return `${point?.name ?? '-'}<br>Max: ${values[4] ?? '-'}<br>Q3: ${values[3] ?? '-'}<br>MÃ©diane: ${values[2] ?? '-'}<br>Q1: ${values[1] ?? '-'}<br>Min: ${values[0] ?? '-'}`
+        return `${point?.name ?? '-'}<br>Max: ${values[4] ?? '-'}<br>Q3: ${values[3] ?? '-'}<br>Médiane: ${values[2] ?? '-'}<br>Q1: ${values[1] ?? '-'}<br>Min: ${values[0] ?? '-'}`
       },
     },
     xAxis: { type: 'category', data: boxes.map(b => b.site), axisLabel: { rotate: 20, fontSize: 10 } },
@@ -108,7 +108,7 @@ function buildBoxChart(): EChartsOption {
   }
 }
 
-// â”€â”€ Heatmap helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Heatmap helpers ──────────────────────────────────────────────────────────
 type HourEntry = { hour: number; dominant_mode?: number | null; dominant_pct?: number | null; dominant_state?: number | null; avg_pct?: number }
 
 function buildMode4HeatmapOption(hm: HourEntry[], site: string): EChartsOption {
@@ -213,7 +213,7 @@ function buildDominantHeatmap(
   }
 }
 
-// â”€â”€ Computed accessors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Computed accessors ───────────────────────────────────────────────────────
 const batteries = computed(() => (data.value?.batteries as Record<string, { pivot: Record<string, unknown>[]; stats: Record<string, unknown>[] }>) ?? {})
 const energies = computed(() => (data.value?.energies as Record<string, { pivot: Record<string, unknown>[]; stats: Record<string, unknown>[] }>) ?? {})
 const transitions = computed(() => (data.value?.transitions as Record<string, unknown>[]) ?? [])
@@ -243,12 +243,12 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
 
   <template v-else-if="data">
 
-    <!-- â”€â”€ Batteries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Batteries ────────────────────────────────────────────────────────── -->
     <div class="section">
       <h3 class="section-title">Batteries</h3>
 
       <template v-if="batteries.minutes_run?.pivot?.length">
-        <h4>DurÃ©e SOC Management (min)</h4>
+        <h4>Durée SOC Management (min)</h4>
         <div class="table-scroll-wrapper">
           <DataTable :value="batteries.minutes_run.pivot" size="small" stripedRows scrollable scrollHeight="280px">
             <Column v-for="col in Object.keys(batteries.minutes_run.pivot[0] ?? {})" :key="col"
@@ -258,7 +258,7 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
             </Column>
           </DataTable>
         </div>
-        <h4 style="margin-top:1rem">Stats DurÃ©e SOC Management (min)</h4>
+        <h4 style="margin-top:1rem">Stats Durée SOC Management (min)</h4>
         <DataTable :value="batteries.minutes_run.stats" size="small" stripedRows>
           <Column field="site" header="Site" sortable />
           <Column field="Min" header="Min" sortable><template #body="{ data }">{{ fmtNum(data['Min']) }}</template></Column>
@@ -266,13 +266,13 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
           <Column field="Max" header="Max" sortable><template #body="{ data }">{{ fmtNum(data['Max']) }}</template></Column>
           <Column field="Date Max" header="Date Max" sortable />
           <Column field="Moyenne" header="Moyenne" sortable><template #body="{ data }">{{ fmtNum(data['Moyenne']) }}</template></Column>
-          <Column field="Ecart-type" header="Ã‰cart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
+          <Column field="Ecart-type" header="Écart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
           <Column field="Jours" header="Jours" sortable />
         </DataTable>
       </template>
 
       <template v-if="batteries.soc_start_pct?.pivot?.length">
-        <h4 style="margin-top:1.25rem">SOC au dÃ©but du SOC Management (%)</h4>
+        <h4 style="margin-top:1.25rem">SOC au début du SOC Management (%)</h4>
         <div class="table-scroll-wrapper">
           <DataTable :value="batteries.soc_start_pct.pivot" size="small" stripedRows scrollable scrollHeight="280px">
             <Column v-for="col in Object.keys(batteries.soc_start_pct.pivot[0] ?? {})" :key="col"
@@ -282,7 +282,7 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
             </Column>
           </DataTable>
         </div>
-        <h4 style="margin-top:1rem">Stats SOC dÃ©but RUN (%)</h4>
+        <h4 style="margin-top:1rem">Stats SOC début RUN (%)</h4>
         <DataTable :value="batteries.soc_start_pct.stats" size="small" stripedRows>
           <Column field="site" header="Site" sortable />
           <Column field="Min" header="Min" sortable><template #body="{ data }">{{ fmtNum(data['Min']) }}</template></Column>
@@ -290,7 +290,7 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
           <Column field="Max" header="Max" sortable><template #body="{ data }">{{ fmtNum(data['Max']) }}</template></Column>
           <Column field="Date Max" header="Date Max" sortable />
           <Column field="Moyenne" header="Moyenne" sortable><template #body="{ data }">{{ fmtNum(data['Moyenne']) }}</template></Column>
-          <Column field="Ecart-type" header="Ã‰cart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
+          <Column field="Ecart-type" header="Écart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
           <Column field="Jours" header="Jours" sortable />
         </DataTable>
       </template>
@@ -304,27 +304,27 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
       </div>
     </div>
 
-    <!-- â”€â”€ Timeline horaire â€” Mode batterie dominant (SOC) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Timeline horaire — Mode batterie dominant (SOC) ─────────────────── -->
     <div class="section" v-if="Object.keys(socDominant).length">
-      <h3 class="section-title">Timeline horaire â€” Mode batterie dominant sur la pÃ©riode</h3>
+      <h3 class="section-title">Timeline horaire — Mode batterie dominant sur la période</h3>
       <div v-for="(hours, site) in socDominant" :key="String(site)" style="margin-bottom:.75rem">
         <HeatmapChart :option="buildDominantHeatmap(hours, String(site), 'dominant_state', SOC_COLORS, SOC_LABELS)" height="100px" />
       </div>
-      <!-- LÃ©gende -->
+      <!-- Légende -->
       <div class="dominant-legend">
         <span v-for="e in legendEntries(SOC_COLORS, SOC_LABELS)" :key="e.state" class="legend-item">
           <span class="legend-dot" :style="{ background: e.color }"></span>{{ e.label }}
         </span>
       </div>
-      <p class="chart-caption">Couleur = Ã©tat dominant. Plus c'est foncÃ©, plus le % de dominance est Ã©levÃ©.</p>
+      <p class="chart-caption">Couleur = état dominant. Plus c'est foncé, plus le % de dominance est élevé.</p>
     </div>
 
-    <!-- â”€â”€ Ã‰nergies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Énergies ──────────────────────────────────────────────────────────── -->
     <div class="section">
-      <h3 class="section-title">Ã‰nergies</h3>
+      <h3 class="section-title">Énergies</h3>
 
       <template v-if="energies.energy_ev_kwh?.pivot?.length">
-        <h4>Ã‰nergie EV (kWh)</h4>
+        <h4>Énergie EV (kWh)</h4>
         <div class="table-scroll-wrapper">
           <DataTable :value="energies.energy_ev_kwh.pivot" size="small" stripedRows scrollable scrollHeight="280px">
             <Column v-for="col in Object.keys(energies.energy_ev_kwh.pivot[0] ?? {})" :key="col"
@@ -334,7 +334,7 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
             </Column>
           </DataTable>
         </div>
-        <h4 style="margin-top:1rem">Stats Ã‰nergie EV (kWh)</h4>
+        <h4 style="margin-top:1rem">Stats Énergie EV (kWh)</h4>
         <DataTable :value="energies.energy_ev_kwh.stats" size="small" stripedRows>
           <Column field="site" header="Site" sortable />
           <Column field="Min" header="Min" sortable><template #body="{ data }">{{ fmtNum(data['Min']) }}</template></Column>
@@ -342,32 +342,32 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
           <Column field="Max" header="Max" sortable><template #body="{ data }">{{ fmtNum(data['Max']) }}</template></Column>
           <Column field="Date Max" header="Date Max" sortable />
           <Column field="Moyenne" header="Moyenne" sortable><template #body="{ data }">{{ fmtNum(data['Moyenne']) }}</template></Column>
-          <Column field="Ecart-type" header="Ã‰cart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
+          <Column field="Ecart-type" header="Écart-type" sortable><template #body="{ data }">{{ fmtNum(data['Ecart-type']) }}</template></Column>
           <Column field="Jours" header="Jours" sortable />
         </DataTable>
       </template>
 
       <template v-if="top3Ev.length">
-        <h4 style="margin-top:1.25rem">Top 3 journÃ©es Ã‰nergie EV par site</h4>
+        <h4 style="margin-top:1.25rem">Top 3 journées Énergie EV par site</h4>
         <DataTable :value="top3Ev" size="small" stripedRows>
           <Column field="Site" header="Site" sortable />
           <Column field="Rang" header="Rang" sortable />
           <Column field="Date" header="Date" sortable />
-          <Column field="Ã‰nergie EV (kWh)" header="Ã‰nergie EV (kWh)" sortable>
-            <template #body="{ data }">{{ fmtNum(data['Ã‰nergie EV (kWh)']) }}</template>
+          <Column field="Énergie EV (kWh)" header="Énergie EV (kWh)" sortable>
+            <template #body="{ data }">{{ fmtNum(data['Énergie EV (kWh)']) }}</template>
           </Column>
         </DataTable>
       </template>
 
       <div style="margin-top:1.25rem" v-if="hasSeries">
-        <LineChart :option="buildLineChart('energy_ev_kwh', 'Ã‰nergie EV journaliÃ¨re', 'kWh')" height="300px" />
+        <LineChart :option="buildLineChart('energy_ev_kwh', 'Énergie EV journalière', 'kWh')" height="300px" />
         <LineChart :option="buildLineChart('ev_peak_kw', 'Puissance EV maximale', 'kW')" height="300px" style="margin-top:1rem" />
       </div>
     </div>
 
-    <!-- â”€â”€ RÃ©gulation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Régulation ────────────────────────────────────────────────────────── -->
     <div class="section">
-      <h3 class="section-title">RÃ©gulation</h3>
+      <h3 class="section-title">Régulation</h3>
 
       <template v-if="statusOverall.length">
         <h4>Status centrale</h4>
@@ -379,45 +379,45 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
           <Column field="Heures AC" header="H AC" sortable><template #body="{ data }">{{ fmtNum(data['Heures AC']) }}</template></Column>
           <Column field="% BATT recharge EV" header="% BATT EV" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge EV']) }}</template></Column>
           <Column field="Heures BATT recharge EV" header="H BATT EV" sortable><template #body="{ data }">{{ fmtNum(data['Heures BATT recharge EV']) }}</template></Column>
-          <Column field="% BATT recharge rÃ©seau" header="% BATT rÃ©seau" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge rÃ©seau']) }}</template></Column>
-          <Column field="Heures BATT recharge rÃ©seau" header="H BATT rÃ©seau" sortable><template #body="{ data }">{{ fmtNum(data['Heures BATT recharge rÃ©seau']) }}</template></Column>
+          <Column field="% BATT recharge réseau" header="% BATT réseau" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge réseau']) }}</template></Column>
+          <Column field="Heures BATT recharge réseau" header="H BATT réseau" sortable><template #body="{ data }">{{ fmtNum(data['Heures BATT recharge réseau']) }}</template></Column>
         </DataTable>
       </template>
 
       <template v-if="statusDaily.length">
-        <h4 style="margin-top:1rem">Moyenne journaliÃ¨re des pourcentages (Status centrale)</h4>
+        <h4 style="margin-top:1rem">Moyenne journalière des pourcentages (Status centrale)</h4>
         <DataTable :value="statusDaily" size="small" stripedRows>
           <Column field="Site" header="Site" sortable />
           <Column field="% OFF" header="% OFF" sortable><template #body="{ data }">{{ fmtNum(data['% OFF']) }}</template></Column>
           <Column field="% AC" header="% AC" sortable><template #body="{ data }">{{ fmtNum(data['% AC']) }}</template></Column>
           <Column field="% BATT recharge EV" header="% BATT recharge EV" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge EV']) }}</template></Column>
-          <Column field="% BATT recharge rÃ©seau" header="% BATT recharge rÃ©seau" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge rÃ©seau']) }}</template></Column>
+          <Column field="% BATT recharge réseau" header="% BATT recharge réseau" sortable><template #body="{ data }">{{ fmtNum(data['% BATT recharge réseau']) }}</template></Column>
         </DataTable>
       </template>
 
       <template v-if="transitions.length">
-        <h4 style="margin-top:1rem">Moyenne des transitions 3 â†’ 4 sur l'intervalle</h4>
+        <h4 style="margin-top:1rem">Moyenne des transitions 3 → 4 sur l'intervalle</h4>
         <DataTable :value="transitions" size="small" stripedRows>
           <Column field="Site" header="Site" sortable />
-          <Column field="Total transitions (3â†’4)" header="Total" sortable />
+          <Column field="Total transitions (3→4)" header="Total" sortable />
           <Column field="Moyenne/jour" header="Moy/jour" sortable><template #body="{ data }">{{ fmtNum(data['Moyenne/jour']) }}</template></Column>
-          <Column field="DurÃ©e moyenne 3â†’4 (min)" header="DurÃ©e moy. (min)" sortable><template #body="{ data }">{{ fmtNum(data['DurÃ©e moyenne 3â†’4 (min)']) }}</template></Column>
-          <Column field="TempÃ©rature moyenne 3â†’4 (Â°C)" header="Temp moy. (Â°C)" sortable><template #body="{ data }">{{ fmtNum(data['TempÃ©rature moyenne 3â†’4 (Â°C)']) }}</template></Column>
+          <Column field="Durée moyenne 3→4 (min)" header="Durée moy. (min)" sortable><template #body="{ data }">{{ fmtNum(data['Durée moyenne 3→4 (min)']) }}</template></Column>
+          <Column field="Température moyenne 3→4 (°C)" header="Temp moy. (°C)" sortable><template #body="{ data }">{{ fmtNum(data['Température moyenne 3→4 (°C)']) }}</template></Column>
           <Column field="Jours" header="Jours" sortable />
         </DataTable>
       </template>
 
       <!-- Heatmap Mode 4 % par heure (une ligne par site) -->
       <template v-if="Object.keys(heatmapPerSite).length">
-        <h4 style="margin-top:1rem">Mode 4 (Batterie) â€” % moyen du temps par heure</h4>
+        <h4 style="margin-top:1rem">Mode 4 (Batterie) — % moyen du temps par heure</h4>
         <div v-for="(hm, site) in heatmapPerSite" :key="String(site)" style="margin-bottom:.75rem">
           <HeatmapChart :option="buildMode4HeatmapOption(hm, String(site))" height="100px" />
         </div>
       </template>
 
-      <!-- Timeline horaire â€” Mode rÃ©gulation dominant -->
+      <!-- Timeline horaire — Mode régulation dominant -->
       <template v-if="Object.keys(regDominant).length">
-        <h4 style="margin-top:1rem">Timeline horaire â€” Mode rÃ©gulation dominant sur la pÃ©riode</h4>
+        <h4 style="margin-top:1rem">Timeline horaire — Mode régulation dominant sur la période</h4>
         <div v-for="(hours, site) in regDominant" :key="String(site)" style="margin-bottom:.75rem">
           <HeatmapChart :option="buildDominantHeatmap(hours, String(site), 'dominant_mode', REG_COLORS, REG_LABELS)" height="100px" />
         </div>
@@ -426,7 +426,7 @@ function legendEntries(colorMap: Record<number, string>, labelMap: Record<number
             <span class="legend-dot" :style="{ background: e.color }"></span>{{ e.label }}
           </span>
         </div>
-        <p class="chart-caption">Couleur = mode dominant. Plus c'est foncÃ©, plus le % de dominance est Ã©levÃ©.</p>
+        <p class="chart-caption">Couleur = mode dominant. Plus c'est foncé, plus le % de dominance est élevé.</p>
       </template>
     </div>
 
