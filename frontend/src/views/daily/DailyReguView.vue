@@ -30,7 +30,7 @@ watch(() => filters.dailyProject, (p) => {
 
 watch(() => filters.dailyDate, (d) => {
   if (!d) return
-  const next = new Date(`${d}T12:00:00`)
+  const next = filters.parseYmdToLocalNoon(d)
   if (!selectedDate.value || selectedDate.value.toISOString().slice(0, 10) !== d) selectedDate.value = next
 })
 
@@ -46,7 +46,7 @@ watch(project, async (p) => {
 
 watch(selectedDate, async (d) => {
   if (!d || !project.value) return
-  const dateStr = d.toISOString().split('T')[0]
+  const dateStr = filters.formatDateToYmdLocal(d)
   filters.setDailyDate(dateStr)
   const currentRequest = ++requestId
   loading.value = true
